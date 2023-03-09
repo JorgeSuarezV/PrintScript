@@ -1,15 +1,18 @@
 package interpreter.lexer
 
 class Lexer {
-    private var actualID = 1
 
-    fun process(text: String){
-        var index = 0
-        while (text.length > index){
-            text.subSequence(0, text.length-1)
-        }
+    fun breakIntoLines(text: String): List<String>{
+        return text.trim().split(System.lineSeparator())
     }
-}
-fun main(){
-    Lexer().process("hello world!")
+
+    fun evaluateLine(text: String): List<Pair<String, Int>> {
+        return text.split("(?<=[^\\p{Alnum}])|(?=[^\\p{Alnum}])|\\s+".toRegex())
+            .filter { it.isNotBlank() }
+            .mapIndexed { index, word -> Pair(word, index) }
+    }
+
+    fun transformToTokens(text: String){
+
+    }
 }

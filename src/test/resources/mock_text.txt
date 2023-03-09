@@ -1,0 +1,5 @@
+let people: string = "hello";
+let a: number = 5;
+let b: number = 3 + a;
+printLn(people + a);
+printLn(7 + b);
