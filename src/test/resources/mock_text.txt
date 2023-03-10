@@ -1,5 +1,5 @@
 let people: string = "hello";
-let a: number = 5;
+let a: number = 54;
 let b: number = 3 + a;
 printLn(people + a);
 printLn(7 + b);

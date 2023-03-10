@@ -1,14 +1,16 @@
 package interpreter.lexer
 
-data class Token(val id: Long, val type: TokenType, val location: Location, val symbol: String)
+data class Token(val id: Int, val type: TokenType, val location: Location, val symbol: String)
 
-data class Location(val row: Long, val column: Long)
+data class Location(val row: Int, val column: Int)
 
 enum class TokenType {
-    NUMBER,
-    STRING,
+    NUMBER_KEYWORD,
+    STRING_KEYWORD,
+    NUMBER_LITERAL,
+    STRING_LITERAL,
     IDENTIFIER,
-    KEYWORD_LET,
+    LET_KEYWORD,
     OPERATOR_PLUS,
     OPERATOR_MINUS,
     OPERATOR_TIMES,
@@ -17,6 +19,5 @@ enum class TokenType {
     SEMI_COMA,
     ASIGNATION_EQUALS,
     LEFT_PARENTHESIS,
-    RIGHT_PARENTHESIS,
-    QUOTATION_MARKS
+    RIGHT_PARENTHESIS
 }
