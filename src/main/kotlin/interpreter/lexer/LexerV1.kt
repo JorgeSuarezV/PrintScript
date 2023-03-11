@@ -58,29 +58,29 @@ class LexerV1 : Lexer {
         val lines = breakIntoLines(text)
         val preTokensAndLocations = mutableListOf<Pair<String, Location>>()
         for (j in lines.indices) {
-            evaluateLine(lines, j, preTokensAndLocations)
+            evaluateLine(lines[j], j, preTokensAndLocations)
         }
         return preTokensAndLocations
     }
 
 
     private fun evaluateLine(
-        lines: List<String>,
-        j: Int,
+        line: String,
+        lineNumber: Int,
         preTokensAndLocations: MutableList<Pair<String, Location>>
     ) {
         var i = 0
-        while (i < lines[j].length) {
-            if (startLiteralString(lines[j][i])){
-                val endIndex = calculateEndOfString(lines[j], i, lines[j][i], Location(j, i))
-                preTokensAndLocations.add(Pair(lines[j].substring(i, endIndex), Location(j, endIndex)))
+        while (i < line.length) {
+            if (startLiteralString(line[i])){
+                val endIndex = calculateEndOfString(line, i, line[i], Location(lineNumber, i))
+                preTokensAndLocations.add(Pair(line.substring(i, endIndex), Location(lineNumber, endIndex)))
                 i = endIndex
-            } else if (isAplhanumeric(lines[j][i])) {
-                val endIndex = calculateEndOfIdentifier(lines[j], i)
-                preTokensAndLocations.add(Pair(lines[j].substring(i, endIndex), Location(j, endIndex)))
+            } else if (isAplhanumeric(line[i])) {
+                val endIndex = calculateEndOfIdentifier(line, i)
+                preTokensAndLocations.add(Pair(line.substring(i, endIndex), Location(lineNumber, endIndex)))
                 i = endIndex
-            } else if (isNotWhiteSpace(lines[j][i])) {
-                preTokensAndLocations.add(Pair(lines[j][i].toString(), Location(j, i)))
+            } else if (isNotWhiteSpace(line[i])) {
+                preTokensAndLocations.add(Pair(line[i].toString(), Location(lineNumber, i)))
                 i++
             } else {
                 i++
