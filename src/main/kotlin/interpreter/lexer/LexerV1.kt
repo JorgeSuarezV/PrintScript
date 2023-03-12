@@ -23,15 +23,8 @@ class LexerV1 : Lexer {
     }
 
     override fun stringTokenizer(text: String): List<Token>{
-        val preTokens = generatePreTokensText(text)
-        return filterPreTokens(preTokens)
-    }
+        return generateTokens(text)
 
-
-    private fun filterPreTokens(preTokens: List<Pair<String, Location>>): List<Token>{
-        return preTokens.mapIndexed { index, preToken ->
-            createToken(preToken.first, index, preToken.second)
-        }
     }
 
     private fun createToken(
@@ -54,39 +47,83 @@ class LexerV1 : Lexer {
         return c.isLetterOrDigit()
     }
 
-    private fun generatePreTokensText(text: String): List<Pair<String, Location>> {
+    private fun generateTokens(text: String): List<Token> {
         val lines = breakIntoLines(text)
-        val preTokensAndLocations = mutableListOf<Pair<String, Location>>()
+        val tokens = mutableListOf<Token>()
         for (j in lines.indices) {
-            evaluateLine(lines[j], j, preTokensAndLocations)
+            evaluateLine(lines[j], j, tokens)
         }
-        return preTokensAndLocations
+        return tokens
     }
-
 
     private fun evaluateLine(
         line: String,
         lineNumber: Int,
-        preTokensAndLocations: MutableList<Pair<String, Location>>
+        tokens: MutableList<Token>
     ) {
         var i = 0
         while (i < line.length) {
-            if (startLiteralString(line[i])){
-                val endIndex = calculateEndOfString(line, i, line[i], Location(lineNumber, i))
-                preTokensAndLocations.add(Pair(line.substring(i, endIndex), Location(lineNumber, i)))
-                i = endIndex
-            } else if (isAplhanumeric(line[i])) {
-                val endIndex = calculateEndOfIdentifier(line, i)
-                preTokensAndLocations.add(Pair(line.substring(i, endIndex), Location(lineNumber, i)))
-                i = endIndex
-            } else if (isNotWhiteSpace(line[i])) {
-                preTokensAndLocations.add(Pair(line[i].toString(), Location(lineNumber, i)))
+            if (isWhiteSpace(line[i])){
                 i++
-            } else {
+            } else if (startLiteralString(line[i])){
+                i = evaluateStringLiteral(line, i, lineNumber, tokens)
+            } else if ((line[i]).isLetter()) {
+                i = evaluateIdentifier(line, i, tokens, lineNumber)
+            }else if (line[i].isDigit()){
+                i = evaluateNumberLiteral(line, i, tokens, lineNumber)
+            } else { //  is a symbol
+                tokens.add(createToken(line[i].toString(), tokens.size, Location(lineNumber, i)))
                 i++
-                continue
             }
         }
+    }
+
+    private fun evaluateNumberLiteral(
+        line: String,
+        i: Int,
+        tokens: MutableList<Token>,
+        lineNumber: Int
+    ): Int {
+        var i1 = i
+        val endIndex = calculateEndOfNumber(line, i1)
+        tokens.add(createToken(line.substring(i1, endIndex), tokens.size, Location(lineNumber, i1)))
+        i1 = endIndex
+        return i1
+    }
+
+    private fun evaluateIdentifier(
+        line: String,
+        i: Int,
+        tokens: MutableList<Token>,
+        lineNumber: Int
+    ): Int {
+        var i1 = i
+        val endIndex = calculateEndOfIdentifier(line, i1)
+        tokens.add(createToken(line.substring(i1, endIndex), tokens.size, Location(lineNumber, i1)))
+        i1 = endIndex
+        return i1
+    }
+
+    private fun evaluateStringLiteral(
+        line: String,
+        i: Int,
+        lineNumber: Int,
+        tokens: MutableList<Token>
+    ): Int {
+        var i1 = i
+        val endIndex = calculateEndOfString(line, i1, line[i1], Location(lineNumber, i1))
+        tokens.add(createToken(line.substring(i1, endIndex), tokens.size, Location(lineNumber, i1)))
+        i1 = endIndex
+        return i1
+    }
+
+    private fun calculateEndOfNumber(line: String, startIndex: Int): Int {
+        val passedADot = false
+        for (i in startIndex + 1 until line.length){
+            if ((line[i]).isDigit() || (line[i] == '.' && !passedADot)) continue
+            else return i
+        }
+        return line.length
     }
 
 
@@ -114,11 +151,10 @@ class LexerV1 : Lexer {
         return line.length
     }
 
-    private fun isNotWhiteSpace(char: Char): Boolean {
-        return !char.isWhitespace()
+    private fun isWhiteSpace(char: Char): Boolean {
+        return char.isWhitespace()
     }
-
-
 }
+
 typealias TokenVerifierFunc = (String) -> Boolean
 typealias StringToTokenFunc = (Int, String, Location) -> Token
