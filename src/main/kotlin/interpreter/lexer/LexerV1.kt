@@ -73,11 +73,11 @@ class LexerV1 : Lexer {
         while (i < line.length) {
             if (startLiteralString(line[i])){
                 val endIndex = calculateEndOfString(line, i, line[i], Location(lineNumber, i))
-                preTokensAndLocations.add(Pair(line.substring(i, endIndex), Location(lineNumber, endIndex)))
+                preTokensAndLocations.add(Pair(line.substring(i, endIndex), Location(lineNumber, i)))
                 i = endIndex
             } else if (isAplhanumeric(line[i])) {
                 val endIndex = calculateEndOfIdentifier(line, i)
-                preTokensAndLocations.add(Pair(line.substring(i, endIndex), Location(lineNumber, endIndex)))
+                preTokensAndLocations.add(Pair(line.substring(i, endIndex), Location(lineNumber, i)))
                 i = endIndex
             } else if (isNotWhiteSpace(line[i])) {
                 preTokensAndLocations.add(Pair(line[i].toString(), Location(lineNumber, i)))
