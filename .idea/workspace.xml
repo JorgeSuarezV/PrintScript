@@ -4,11 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="eb6030eb-dc00-4e85-98d8-a5deea76f69f" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/kotlinc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/interpreter/executor/Executor.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="eb6030eb-dc00-4e85-98d8-a5deea76f69f" name="Changes" comment="executor algo hecho">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/interpreter/executor/Executor.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/interpreter/executor/Executor.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -53,6 +51,12 @@
       <filtered-out-file-type name="TAG" />
       <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
     </file-type-list>
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-common/1.6.20/e81e108a2817747538df29b32a151db38e5da5a2/kotlin-stdlib-common-1.6.20-sources.jar!/kotlin/text/Strings.kt" root0="SKIP_INSPECTION" />
+    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/1.6.20/bc58085192d5abb48080e3670915133715a33ce0/kotlin-stdlib-1.6.20-sources.jar!/kotlin/text/StringsJVM.kt" root0="SKIP_INSPECTION" />
+    <setting file="file://$USER_HOME$/.gradle/caches/transforms-3/ecd5a29171dcca55eedd7b369bad00b6/transformed/unzipped-distribution/gradle-7.3.3/subprojects/testing-base/src/main/java/org/gradle/api/internal/tasks/testing/SuiteTestClassProcessor.java" root0="SKIP_INSPECTION" />
+    <setting file="file://$USER_HOME$/.gradle/caches/transforms-3/ecd5a29171dcca55eedd7b369bad00b6/transformed/unzipped-distribution/gradle-7.3.3/subprojects/testing-junit-platform/src/main/java/org/gradle/api/internal/tasks/testing/junitplatform/JUnitPlatformTestClassProcessor.java" root0="SKIP_INSPECTION" />
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
@@ -191,11 +195,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.LexerTest.testEvaluateText" />
-        <item itemvalue="Gradle.LexerTest.testEvaluateLine (1)" />
+        <item itemvalue="Kotlin.LexerKt" />
         <item itemvalue="Gradle.LexerTest (1)" />
         <item itemvalue="Gradle.LexerTest.testLineSeparator (1)" />
-        <item itemvalue="Kotlin.LexerKt" />
+        <item itemvalue="Gradle.LexerTest.testEvaluateText" />
+        <item itemvalue="Gradle.LexerTest.testEvaluateLine (1)" />
       </list>
     </recent_temporary>
   </component>
@@ -214,6 +218,8 @@
       <workItem from="1678566580871" duration="4056000" />
       <workItem from="1678574254807" duration="4982000" />
       <workItem from="1678648134850" duration="338000" />
+      <workItem from="1678652954782" duration="1241000" />
+      <workItem from="1678757687341" duration="986000" />
     </task>
     <servers />
   </component>
