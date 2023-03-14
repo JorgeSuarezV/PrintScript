@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="eb6030eb-dc00-4e85-98d8-a5deea76f69f" name="Changes" comment="little column fix">
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/interpreter/lexer/LexerV1.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/interpreter/lexer/LexerV1.kt" afterDir="false" />
-    </list>
+    <list default="true" id="eb6030eb-dc00-4e85-98d8-a5deea76f69f" name="Changes" comment="final LexerV1 I hope" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -246,7 +244,14 @@
       <option name="project" value="LOCAL" />
       <updated>1678571031929</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="final LexerV1 I hope">
+      <created>1678657398604</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1678657398604</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -266,7 +271,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Lexer ready, not tested" />
     <MESSAGE value="Lexer tested. Could be better." />
-    <option name="LAST_COMMIT_MESSAGE" value="Lexer tested. Could be better." />
+    <MESSAGE value="final LexerV1 I hope" />
+    <option name="LAST_COMMIT_MESSAGE" value="final LexerV1 I hope" />
   </component>
   <component name="XDebuggerManager">
     <watches-manager>

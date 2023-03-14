@@ -1,42 +1,83 @@
 package interpreter.lexer
 
+import java.util.LinkedList
+
 class LexerV1 : Lexer {
 
-    private val tokenMap = LinkedHashMap<TokenVerifierFunc, StringToTokenFunc>()
+    private val ignoredStrings: MutableList<IgnoredVerifierFunc> = LinkedList()
+    private val tokenMap: MutableMap<TokenVerifierFunc, StringToTokenFunc> = LinkedHashMap()
 
     init {
-        tokenMap.put({ string -> string == "let" }, { id, _, location -> Token(id, TokenType.LET_KEYWORD, location, "")})
-        tokenMap.put({string -> string == "string" }, { id, _, location -> Token(id, TokenType.STRING_KEYWORD, location, "")})
-        tokenMap.put({string -> string == "number" }, { id, _, location -> Token(id, TokenType.NUMBER_KEYWORD, location, "")})
-        tokenMap.put({ string -> string == ":" }, { id, _, location -> Token(id, TokenType.DOUBLE_DOTS, location, "")})
-        tokenMap.put({ string -> string == ";" }, { id, _, location -> Token(id, TokenType.SEMI_COLON, location, "")})
-        tokenMap.put({ string -> string == "+" }, { id, _, location -> Token(id, TokenType.OPERATOR_PLUS, location, "")})
-        tokenMap.put({ string -> string == "-" }, { id, _, location -> Token(id, TokenType.OPERATOR_MINUS, location, "")})
-        tokenMap.put({ string -> string == "/" }, { id, _, location -> Token(id, TokenType.OPERATOR_DIVIDE, location, "")})
-        tokenMap.put({ string -> string == "*" }, { id, _, location -> Token(id, TokenType.OPERATOR_TIMES, location, "")})
-        tokenMap.put({ string -> string == "(" }, { id, _, location -> Token(id, TokenType.LEFT_PARENTHESIS, location, "")})
-        tokenMap.put({ string -> string == ")" }, { id, _, location -> Token(id, TokenType.RIGHT_PARENTHESIS, location, "")})
-        tokenMap.put({ string -> string == "=" }, { id, _, location -> Token(id, TokenType.ASIGNATION_EQUALS, location, "")})
-        tokenMap.put({ string -> string[0].isDigit() }, { id, string, location -> Token(id, TokenType.NUMBER_LITERAL, location, string.substring(0, string.length))})
-        tokenMap.put({ string -> string[0].isLetter() }, { id, string, location -> Token(id, TokenType.IDENTIFIER, location, string.substring(0, string.length))})
-        tokenMap.put({ string -> string[0] == '"' || string[0] == '\'' }, { id, string, location -> Token(id, TokenType.STRING_LITERAL, location, string.substring(0, string.length))})
+        ignoredStrings.add { string, startIndex -> if (string[startIndex] == ' ') startIndex + 1 else -1 }
+        ignoredStrings.add { string, startIndex -> if (checkIfStringEvaluatedFits(string, startIndex, 2) && string.substring(startIndex, startIndex + 2) == "//") string.length else -1 }
+
+        tokenMap.put(
+            {string, startIndex -> isThisString(string, startIndex, "let") },
+            { id, _, location -> Pair(Token(id, TokenType.LET_KEYWORD, location, ""), location.column + 3)})
+        tokenMap.put(
+            {string, startIndex -> isThisString(string, startIndex, "number") },
+            { id, _, location -> Pair(Token(id, TokenType.NUMBER_KEYWORD, location, ""), location.column + 6)})
+        tokenMap.put(
+            {string, startIndex -> isThisString(string, startIndex, "string") },
+            { id, _, location -> Pair(Token(id, TokenType.STRING_KEYWORD, location, ""), location.column + 6)})
+        tokenMap.put(
+            { string, startIndex -> isThisString(string, startIndex, ":")},
+            { id, _, location -> Pair(Token(id, TokenType.DOUBLE_DOTS, location, ""), location.column + 1)})
+        tokenMap.put(
+            { string, startIndex -> isThisString(string, startIndex, ";")},
+            { id, _, location -> Pair(Token(id, TokenType.SEMI_COLON, location, ""), location.column + 1)})
+        tokenMap.put(
+            { string, startIndex -> isThisString(string, startIndex, "+")},
+            { id, _, location -> Pair(Token(id, TokenType.OPERATOR_PLUS, location, ""), location.column + 1)})
+        tokenMap.put(
+            { string, startIndex -> isThisString(string, startIndex, "-")},
+            { id, _, location -> Pair(Token(id, TokenType.OPERATOR_MINUS, location, ""), location.column + 1)})
+        tokenMap.put(
+            { string, startIndex -> isThisString(string, startIndex, "/")},
+            { id, _, location -> Pair(Token(id, TokenType.OPERATOR_DIVIDE, location, ""), location.column + 1)})
+        tokenMap.put(
+            { string, startIndex -> isThisString(string, startIndex, "*")},
+            { id, _, location -> Pair(Token(id, TokenType.OPERATOR_TIMES, location, ""), location.column + 1)})
+        tokenMap.put(
+            { string, startIndex -> isThisString(string, startIndex, "(")},
+            { id, _, location -> Pair(Token(id, TokenType.LEFT_PARENTHESIS, location, ""), location.column + 1)})
+        tokenMap.put(
+            { string, startIndex -> isThisString(string, startIndex, ")")},
+            { id, _, location -> Pair(Token(id, TokenType.RIGHT_PARENTHESIS, location, ""), location.column + 1)})
+        tokenMap.put(
+            { string, startIndex -> isThisString(string, startIndex, "=")},
+            { id, _, location -> Pair(Token(id, TokenType.ASIGNATION_EQUALS, location, ""), location.column + 1)})
+        tokenMap.put(
+            { string, startIndex -> string[startIndex].isDigit() },
+            { id, string, location -> Pair(Token(id, TokenType.NUMBER_LITERAL, location, cutNumberFromLine(string, location)), calculateEndOfNumber(string, location.column))})
+        tokenMap.put(
+            { string, startIndex -> string[startIndex].isLetter() },
+            { id, string, location -> Pair(Token(id, TokenType.IDENTIFIER, location, cutIdentifierFromLine(string, location)), calculateEndOfIdentifier(string, location.column))})
+        tokenMap.put(
+            { string, startIndex -> string[startIndex] == '"'},
+            { id, string, location -> Pair(Token(id, TokenType.STRING_LITERAL, location, curStringLitFromLine(string, location, '"')), calculateEndOfString(string, location.column, '"', location))})
+        tokenMap.put(
+            { string, startIndex -> string[startIndex] == '\''},
+            { id, string, location -> Pair(Token(id, TokenType.STRING_LITERAL, location, curStringLitFromLine(string, location, '\'')), calculateEndOfString(string, location.column, '\'', location))})
     }
+
+    private fun curStringLitFromLine(string: String, location: Location, stringStarter: Char) =
+        string.substring(location.column, calculateEndOfString(string, location.column, stringStarter, location))
+
+    private fun cutIdentifierFromLine(string: String, location: Location) =
+        string.substring(location.column, calculateEndOfIdentifier(string, location.column))
+
+    private fun cutNumberFromLine(string: String, location: Location) =
+        string.substring(location.column, calculateEndOfNumber(string, location.column))
+
+    private fun isThisString(string: String, startIndex: Int, target: String) =
+        (checkIfStringEvaluatedFits(string, startIndex, target.length) && string.substring(startIndex, startIndex + target.length) == target)
+
+    private fun checkIfStringEvaluatedFits(string: String, index: Int, stringEvaluatedLength: Int) = string.length >= index + stringEvaluatedLength
 
     override fun stringTokenizer(text: String): List<Token>{
         return generateTokens(text)
 
-    }
-
-    private fun createToken(
-        first: String,
-        i: Int,
-        location: Location
-    ): Token {
-        for ((key, value) in tokenMap) {
-            if (!key.invoke(first)) continue
-            return value.invoke(i, first, location)
-        }
-        throw InvalidTokenException("Invalid character", location)
     }
 
     private fun breakIntoLines(text: String): List<String>{
@@ -63,64 +104,58 @@ class LexerV1 : Lexer {
     ) {
         var i = 0
         while (i < line.length) {
-            if (isWhiteSpace(line[i])){
-                i++
-            } else if (startLiteralString(line[i])){
-                i = evaluateStringLiteral(line, i, lineNumber, tokens)
-            } else if ((line[i]).isLetter()) {
-                i = evaluateIdentifier(line, i, tokens, lineNumber)
-            }else if (line[i].isDigit()){
-                i = evaluateNumberLiteral(line, i, tokens, lineNumber)
-            } else { //  is a symbol
-                tokens.add(createToken(line[i].toString(), tokens.size, Location(lineNumber, i)))
-                i++
+            val ignoredWordsResult = checkIfIgnoredString(line, i)
+            if (ignoredWordsResult.first) {
+                i= ignoredWordsResult.second
+                continue
             }
+            i = matchWord(line, i, tokens, lineNumber)
         }
     }
 
-    private fun evaluateNumberLiteral(
+    private fun checkIfIgnoredString(line: String, i: Int): Pair<Boolean,Int> {
+        var i1 = i
+        val ignoredStringResult = isIgnoredString(line, i1)
+        if (ignoredStringResult.first) {
+            i1 = ignoredStrings[ignoredStringResult.second].invoke(line, i1)
+            return Pair(true, i1)
+        }
+        return Pair(false, i)
+    }
+
+    private fun matchWord(
         line: String,
-        i: Int,
+        startIndex: Int,
         tokens: MutableList<Token>,
         lineNumber: Int
     ): Int {
-        var i1 = i
-        val endIndex = calculateEndOfNumber(line, i1)
-        tokens.add(createToken(line.substring(i1, endIndex), tokens.size, Location(lineNumber, i1)))
-        i1 = endIndex
-        return i1
+        var i = startIndex
+        for ((key, value) in tokenMap) {
+            if (key.invoke(line, i)) {
+                val result = value.invoke(tokens.size, line, Location(lineNumber, i))
+                tokens.add(result.first)
+                i = result.second
+                break
+            }
+        }
+        if (i == startIndex) throw InvalidTokenException("Invalid character", Location(lineNumber, startIndex)) else return i
     }
 
-    private fun evaluateIdentifier(
-        line: String,
-        i: Int,
-        tokens: MutableList<Token>,
-        lineNumber: Int
-    ): Int {
-        var i1 = i
-        val endIndex = calculateEndOfIdentifier(line, i1)
-        tokens.add(createToken(line.substring(i1, endIndex), tokens.size, Location(lineNumber, i1)))
-        i1 = endIndex
-        return i1
-    }
-
-    private fun evaluateStringLiteral(
-        line: String,
-        i: Int,
-        lineNumber: Int,
-        tokens: MutableList<Token>
-    ): Int {
-        var i1 = i
-        val endIndex = calculateEndOfString(line, i1, line[i1], Location(lineNumber, i1))
-        tokens.add(createToken(line.substring(i1, endIndex), tokens.size, Location(lineNumber, i1)))
-        i1 = endIndex
-        return i1
+    private fun isIgnoredString(line: String, i: Int): Pair<Boolean, Int> {
+        for (j in ignoredStrings.indices) {
+            if (ignoredStrings[j].invoke(line, i) == -1) continue
+            else return Pair(true, j)
+        }
+        return Pair(false, 0)
     }
 
     private fun calculateEndOfNumber(line: String, startIndex: Int): Int {
-        val passedADot = false
+        var passedADot = false
         for (i in startIndex + 1 until line.length){
-            if ((line[i]).isDigit() || (line[i] == '.' && !passedADot)) continue
+            if ((line[i]).isDigit() || (line[i] == '.' && !passedADot)){
+                if (line[i] == '.') passedADot = true
+                continue
+            }
             else return i
         }
         return line.length
@@ -139,9 +174,7 @@ class LexerV1 : Lexer {
         return c == c1
     }
 
-    private fun startLiteralString(c: Char): Boolean {
-        return c == '"' || c == '\''
-    }
+
 
     private fun calculateEndOfIdentifier(line: String, startIndex: Int): Int {
         for (i in startIndex + 1 until line.length){
@@ -150,11 +183,8 @@ class LexerV1 : Lexer {
         }
         return line.length
     }
-
-    private fun isWhiteSpace(char: Char): Boolean {
-        return char.isWhitespace()
-    }
 }
 
-typealias TokenVerifierFunc = (String) -> Boolean
-typealias StringToTokenFunc = (Int, String, Location) -> Token
+typealias IgnoredVerifierFunc = (line: String, startIndex: Int) -> Int
+typealias TokenVerifierFunc = (line: String, startIndex: Int) -> Boolean
+typealias StringToTokenFunc = (id: Int, line: String, location: Location) -> Pair<Token, Int>
